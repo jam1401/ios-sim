@@ -28,6 +28,7 @@ NSString *deviceIpadRetina = @"iPad (Retina)";
   fprintf(stderr, "\n");
   fprintf(stderr, "Commands:\n");
   fprintf(stderr, "  showsdks                        List the available iOS SDK versions\n");
+  fprintf(stderr, "  showsdksjson                    List the available iOS SDK versions in parsable form\n");
   fprintf(stderr, "  launch <application path>       Launch the application at the specified path on the iOS Simulator\n");
   fprintf(stderr, "  start                           Launch iOS Simulator without an app\n");
   fprintf(stderr, "\n");
@@ -49,9 +50,30 @@ NSString *deviceIpadRetina = @"iPad (Retina)";
   fprintf(stderr, "  --args <...>                    All following arguments will be passed on to the application\n");
 }
 
+- (int) showSDKsJson {
+  NSArray *roots = [DTiPhoneSimulatorSystemRoot knownRoots];
+  NSMutableArray *sdks = [[NSMutableArray alloc] init];
+   
+  for (DTiPhoneSimulatorSystemRoot *root in roots) {
+    NSDictionary *sdk_info = [NSDictionary dictionaryWithObjectsAndKeys: [root sdkDisplayName], @"sdkName", [root sdkVersion], @"sdkVersion", [root sdkRootPath], @"sdkPath",nil];
+    [sdks addObject:sdk_info];
+  }
+  
+  NSData* jsonData = [NSJSONSerialization dataWithJSONObject:sdks options:NSJSONWritingPrettyPrinted error:nil];
+  
+  NSString* jsonText = [[NSString alloc] initWithData:jsonData
+                                           encoding:NSUTF8StringEncoding];
+  nsfprintf(stderr, jsonText);
+  return EXIT_SUCCESS;
+}
+
+
+
 
 - (int) showSDKs {
   NSArray *roots = [DTiPhoneSimulatorSystemRoot knownRoots];
+  
+  
 
   nsprintf(@"Simulator SDK Roots:");
   for (DTiPhoneSimulatorSystemRoot *root in roots) {
@@ -294,7 +316,9 @@ NSString *deviceIpadRetina = @"iPad (Retina)";
 
   if (strcmp(argv[1], "showsdks") == 0) {
     exit([self showSDKs]);
-  } else if (strcmp(argv[1], "launch") == 0 || startOnly) {
+  } else if (strcmp(argv[1], "showsdksjson") == 0) {
+    exit([self showSDKsJson]);
+  }else if (strcmp(argv[1], "launch") == 0 || startOnly) {
     if (strcmp(argv[1], "launch") == 0 && argc < 3) {
       fprintf(stderr, "Missing application path argument\n");
       [self printUsage];
