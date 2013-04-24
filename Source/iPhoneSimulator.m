@@ -279,6 +279,17 @@ NSString *deviceIpadRetina = @"iPad (Retina)";
 }
 
 - (void) changeDeviceType:(NSString *)family retina:(BOOL)retina isTallDevice:(BOOL)isTallDevice {
+      NSString* device = [[[NSProcessInfo processInfo]environment]objectForKey:@"RETINA"];
+      NSString* tall = [[[NSProcessInfo processInfo]environment]objectForKey:@"TALL"];
+  
+  if (device != nil)
+  {
+    retina = YES;
+  }
+  
+  if (tall != nil) {
+    isTallDevice = YES;
+  }
   NSString *devicePropertyValue;
   if (retina) {
     if (verbose) {
